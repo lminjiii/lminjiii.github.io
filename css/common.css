@@ -1,5 +1,12 @@
 body {
   font-family: "Pretendard Variable", sans-serif;
+  word-break: keep-all;
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+img {
+  display: block;
 }
 
 .page-title  {
@@ -43,7 +50,7 @@ body {
   cursor: pointer;
 
   border-radius: 20px;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   margin-left: auto;
   margin-right: auto;
 
