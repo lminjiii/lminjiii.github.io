@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>가위바위보 게임</title>
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #74EBD5 0%, #9FACE6 100%);
+      --secondary-gradient: linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%);
+      --bg-gradient: linear-gradient(135deg, #E0EAFC 0%, #CFDEF3 100%);
+      --win-color: #4CAF50;
+      --lose-color: #FF5252;
+      --draw-color: #2196F3;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #2c3e50;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      background: linear-gradient(to right, #2c3e50, #3498db);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(44,62,80,0.1);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .game-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(44,62,80,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 320px;
+      transform: translateY(0);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(116,235,213,0.1) 0%, transparent 60%);
+      animation: rotate 10s linear infinite;
+      pointer-events: none;
+    }
+
+    .choices {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .choice-btn {
+      width: 80px;
+      height: 80px;
+      border: none;
+      border-radius: 50%;
+      font-size: 2.5rem;
+      cursor: pointer;
+      background: #fff;
+      color: #2c3e50;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .choice-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 30% 30%, rgba(116,235,213,0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .choice-btn:hover {
+      transform: translateY(-5px) scale(1.1);
+      background: #fff;
+      box-shadow: 0 8px 25px rgba(116,235,213,0.4);
+    }
+
+    .choice-btn:active {
+      transform: translateY(0) scale(0.95);
+    }
+
+    .choices-info {
+      font-size: 1.3rem;
+      margin: 1rem 0;
+      padding: 0.8rem 1.5rem;
+      background: rgba(116,235,213,0.1);
+      border-radius: 15px;
+      transition: all 0.3s ease;
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    .result {
+      font-size: 1.5rem;
+      font-weight: bold;
+      min-height: 2rem;
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 15px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+
+    .result.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .result.win {
+      color: var(--win-color);
+    }
+
+    .result.lose {
+      color: var(--lose-color);
+    }
+
+    .result.draw {
+      color: var(--draw-color);
+    }
+
+    .scoreboard {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 1rem 2rem;
+      border-radius: 15px;
+      margin: 1rem 0;
+      display: flex;
+      gap: 1.5rem;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 15px rgba(44,62,80,0.1);
+    }
+
+    .scoreboard span {
+      position: relative;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      background: rgba(116,235,213,0.1);
+      min-width: 100px;
+      text-align: center;
+      transition: all 0.3s ease;
+      color: #2c3e50;
+    }
+
+    .scoreboard span:hover {
+      background: rgba(116,235,213,0.2);
+      transform: translateY(-2px);
+    }
+
+    .reset-btn {
+      margin-top: 1.5rem;
+      padding: 0.8rem 2rem;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 25px;
+      background: var(--secondary-gradient);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(255,182,193,0.4);
+    }
+
+    .reset-btn::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        to right,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+      );
+      transform: rotate(45deg);
+      transition: 0.5s;
+    }
+
+    .reset-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255,182,193,0.6);
+    }
+
+    .reset-btn:hover::after {
+      animation: shine 1.5s infinite;
+    }
+
+    .reset-btn:active {
+      transform: translateY(1px);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes shine {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    @media (max-width: 480px) {
+      .game-container {
+        padding: 1.5rem;
+        min-width: 280px;
+      }
+      
+      .choice-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+      }
+
+      .scoreboard {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>가위바위보 게임 ✨</h1>
+  <div class="game-container">
+    <div class="choices">
+      <button class="choice-btn" data-choice="rock">✊</button>
+      <button class="choice-btn" data-choice="paper">✋</button>
+      <button class="choice-btn" data-choice="scissors">✌️</button>
+    </div>
+    <div class="choices-info">나: <b>?</b> vs 컴퓨터: <b>?</b></div>
+    <div class="result" id="result">선택하세요!</div>
+    <div class="scoreboard">
+      <span id="score-user">나: 0</span>
+      <span id="score-com">컴퓨터: 0</span>
+      <span id="score-draw">무: 0</span>
+    </div>
+    <button class="reset-btn" id="resetBtn">게임 다시 시작</button>
+  </div>
+
+  <script>
+    const choices = ['rock', 'paper', 'scissors'];
+    const emojis = { rock: '✊', paper: '✋', scissors: '✌️' };
+    let userScore = 0;
+    let computerScore = 0;
+    let drawScore = 0;
+
+    function getComputerChoice() {
+      const idx = Math.floor(Math.random() * 3);
+      return choices[idx];
+    }
+
+    function getResult(user, computer) {
+      if (user === computer) return 'draw';
+      if (
+        (user === 'rock' && computer === 'scissors') ||
+        (user === 'scissors' && computer === 'paper') ||
+        (user === 'paper' && computer === 'rock')
+      ) return 'win';
+      return 'lose';
+    }
+
+    function updateScoreboard() {
+      document.getElementById('score-user').textContent = `나: ${userScore}`;
+      document.getElementById('score-com').textContent = `컴퓨터: ${computerScore}`;
+      document.getElementById('score-draw').textContent = `무: ${drawScore}`;
+    }
+
+    function showResult(result, user, computer) {
+      const choicesInfo = document.querySelector('.choices-info');
+      choicesInfo.innerHTML = `나: <b>${emojis[user]}</b> vs 컴퓨터: <b>${emojis[computer]}</b>`;
+
+      const resultDiv = document.getElementById('result');
+      resultDiv.className = 'result show ' + result;
+      
+      let msg = '';
+      if (result === 'draw') {
+        msg = '무승부! 🤝';
+      } else if (result === 'win') {
+        msg = '이겼어요! 🎉';
+      } else {
+        msg = '졌어요! 😢';
+      }
+      resultDiv.innerHTML = msg;
+
+      // 버튼 애니메이션 효과
+      const buttons = document.querySelectorAll('.choice-btn');
+      buttons.forEach(btn => {
+        if (btn.getAttribute('data-choice') === user) {
+          btn.style.transform = 'scale(1.2)';
+          setTimeout(() => {
+            btn.style.transform = '';
+          }, 500);
+        }
+      });
+    }
+
+    document.querySelectorAll('.choice-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const userChoice = btn.getAttribute('data-choice');
+        const computerChoice = getComputerChoice();
+        const result = getResult(userChoice, computerChoice);
+        
+        if (result === 'win') userScore++;
+        else if (result === 'lose') computerScore++;
+        else if (result === 'draw') drawScore++;
+        
+        showResult(result, userChoice, computerChoice);
+        updateScoreboard();
+      });
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      userScore = 0;
+      computerScore = 0;
+      drawScore = 0;
+      updateScoreboard();
+      document.querySelector('.choices-info').innerHTML = '나: <b>?</b> vs 컴퓨터: <b>?</b>';
+      const resultDiv = document.getElementById('result');
+      resultDiv.textContent = '선택하세요!';
+      resultDiv.className = 'result';
+    });
+  </script>
+</body>
+</html> 
